@@ -46,6 +46,7 @@ BOOL CMyNote2Doc::OnNewDocument()
 	// TODO: 在此添加重新初始化代码
 	// (SDI 文档将重用该文档)
 	m_strContent = _T(""); // 新建
+	m_filePath = _T("");
 
 	return TRUE;
 }
@@ -67,6 +68,19 @@ void CMyNote2Doc::Serialize(CArchive& ar)
 		// TODO: 在此添加加载代码
 		ar >> m_strContent;
 	}
+}
+
+bool CMyNote2Doc::SaveToFile(const CString& path)
+{
+	CStdioFile file;
+	if (!file.Open(path, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary))
+	{
+		return false;
+	}
+
+	file.WriteString(m_strContent);
+	file.Close();
+	return true;
 }
 
 #ifdef SHARED_HANDLERS

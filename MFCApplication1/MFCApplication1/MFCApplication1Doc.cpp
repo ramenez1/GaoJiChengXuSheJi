@@ -45,6 +45,7 @@ BOOL CMFCApplication1Doc::OnNewDocument()
 
 	// TODO: 在此添加重新初始化代码
 	// (SDI 文档将重用该文档)
+	m_filePath = _T("");
 
 	return TRUE;
 }
@@ -92,6 +93,21 @@ void CMFCApplication1Doc::Serialize(CArchive& ar)
 		}
 	}
 	
+}
+
+bool CMFCApplication1Doc::SaveToFile(const CString& path)
+{
+	CFile file;
+	if (!file.Open(path, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary))
+	{
+		return false;
+	}
+
+	CArchive ar(&file, CArchive::store);
+	Serialize(ar);
+	ar.Close();
+	file.Close();
+	return true;
 }
 
 #ifdef SHARED_HANDLERS
