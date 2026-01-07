@@ -66,10 +66,11 @@ public:
 	afx_msg void OnUpdateDrawEllipse(CCmdUI* pCmdUI);
 	afx_msg void OnEditUndo();
 	afx_msg void OnEditClearall();
+	afx_msg void OnFileSave();
+	afx_msg void OnFileSaveAs();
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本
 inline CMFCApplication1Doc* CMFCApplication1View::GetDocument() const
    { return reinterpret_cast<CMFCApplication1Doc*>(m_pDocument); }
 #endif
-

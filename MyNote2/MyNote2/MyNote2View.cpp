@@ -13,6 +13,8 @@
 #include "MyNote2Doc.h"
 #include "MyNote2View.h"
 
+#include <afxdlgs.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -30,8 +32,11 @@ BEGIN_MESSAGE_MAP(CMyNote2View, CView)
 	ON_WM_CHAR()
 	ON_COMMAND(ID_SET_FONT, &CMyNote2View::OnSetFont)
 	ON_COMMAND(ID_SET_BG, &CMyNote2View::OnSetBg)
-//	ON_WM_SETFOCUS()
-//	ON_WM_KILLFOCUS()
+	ON_COMMAND(ID_FILE_SAVE, &CMyNote2View::OnFileSave)
+	ON_COMMAND(ID_FILE_SAVE_AS, &CMyNote2View::OnFileSaveAs)
+	ON_WM_SETFOCUS()
+	ON_WM_KILLFOCUS()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CMyNote2View 构造/析构
@@ -43,6 +48,7 @@ CMyNote2View::CMyNote2View() noexcept
 	m_brBack.CreateSolidBrush(m_crBack);
 	// 初始字体（宋体，高20像素）
 	m_font.CreatePointFont(120, _T("宋体"));
+	m_hasFocus = false;
 
 }
 
@@ -137,8 +143,10 @@ void CMyNote2View::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		pDoc->m_strContent += (TCHAR)nChar; // 把按下的字符加进去
 	}
 
+	pDoc->SetModifiedFlag(TRUE);
 	Invalidate(); 
 
+	UpdateCaretPosition();
 	CView::OnChar(nChar, nRepCnt, nFlags);
 }
 
@@ -153,6 +161,7 @@ void CMyNote2View::OnSetFont()
 		dlg.GetCurrentFont(&lf); // 拿到用户选的新字体
 		m_font.CreateFontIndirect(&lf); // 创建新字体
 		Invalidate(); // 立即刷屏
+		UpdateCaretPosition();
 	}
 }
 
@@ -165,6 +174,134 @@ void CMyNote2View::OnSetBg()
 		m_brBack.DeleteObject();
 		m_brBack.CreateSolidBrush(m_crBack); // 更新刷子
 		Invalidate(); // 立即刷屏
+		UpdateCaretPosition();
+	}
+}
+
+void CMyNote2View::UpdateCaretPosition()
+{
+	if (!m_hasFocus)
+	{
+		return;
+	}
+
+	CMyNote2Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	CClientDC dc(this);
+	CFont* pOldFont = dc.SelectObject(&m_font);
+
+	CRect rect;
+	GetClientRect(&rect);
+	int lineHeight = dc.GetTextExtent(L"A").cy;
+
+	int x = 0;
+	int y = 0;
+	CString text = pDoc->m_strContent;
+	for (int i = 0; i < text.GetLength(); ++i)
+	{
+		TCHAR ch = text[i];
+		if (ch == L'\r')
+		{
+			continue;
+		}
+		if (ch == L'\n')
+		{
+			x = 0;
+			y += lineHeight;
+			continue;
+		}
+
+		CString oneChar(ch);
+		CSize sz = dc.GetTextExtent(oneChar);
+		if (x + sz.cx > rect.Width())
+		{
+			x = 0;
+			y += lineHeight;
+		}
+		x += sz.cx;
+	}
+
+	dc.SelectObject(pOldFont);
+	SetCaretPos(CPoint(x, y));
+}
+
+void CMyNote2View::OnSetFocus(CWnd* pOldWnd)
+{
+	CView::OnSetFocus(pOldWnd);
+	m_hasFocus = true;
+
+	CClientDC dc(this);
+	CFont* pOldFont = dc.SelectObject(&m_font);
+	int lineHeight = dc.GetTextExtent(L"A").cy;
+	dc.SelectObject(pOldFont);
+
+	CreateSolidCaret(2, lineHeight);
+	UpdateCaretPosition();
+	ShowCaret();
+}
+
+void CMyNote2View::OnKillFocus(CWnd* pNewWnd)
+{
+	CView::OnKillFocus(pNewWnd);
+	m_hasFocus = false;
+	HideCaret();
+	DestroyCaret();
+}
+
+void CMyNote2View::OnSize(UINT nType, int cx, int cy)
+{
+	CView::OnSize(nType, cx, cy);
+	UpdateCaretPosition();
+}
+
+void CMyNote2View::OnFileSave()
+{
+	CMyNote2Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	if (pDoc->m_filePath.IsEmpty())
+	{
+		OnFileSaveAs();
+		return;
+	}
+
+	if (pDoc->SaveToFile(pDoc->m_filePath))
+	{
+		pDoc->SetModifiedFlag(FALSE);
+	}
+}
+
+void CMyNote2View::OnFileSaveAs()
+{
+	CMyNote2Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	CFileDialog dlg(FALSE, L"txt", nullptr,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||");
+
+	if (dlg.DoModal() == IDOK)
+	{
+		CString path = dlg.GetPathName();
+		if (pDoc->SaveToFile(path))
+		{
+			pDoc->m_filePath = path;
+			pDoc->SetPathName(path);
+			pDoc->SetModifiedFlag(FALSE);
+		}
 	}
 }
 
