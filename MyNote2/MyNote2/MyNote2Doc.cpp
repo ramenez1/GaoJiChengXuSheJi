@@ -13,6 +13,7 @@
 #include "MyNote2Doc.h"
 
 #include <propkey.h>
+#include <afxdlgs.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,6 +24,8 @@
 IMPLEMENT_DYNCREATE(CMyNote2Doc, CDocument)
 
 BEGIN_MESSAGE_MAP(CMyNote2Doc, CDocument)
+	ON_COMMAND(ID_FILE_SAVE, &CMyNote2Doc::OnFileSave)
+	ON_COMMAND(ID_FILE_SAVE_AS, &CMyNote2Doc::OnFileSaveAs)
 END_MESSAGE_MAP()
 
 
@@ -46,6 +49,7 @@ BOOL CMyNote2Doc::OnNewDocument()
 	// TODO: 在此添加重新初始化代码
 	// (SDI 文档将重用该文档)
 	m_strContent = _T(""); // 新建
+	m_filePath = _T("");
 
 	return TRUE;
 }
@@ -66,6 +70,51 @@ void CMyNote2Doc::Serialize(CArchive& ar)
 	{
 		// TODO: 在此添加加载代码
 		ar >> m_strContent;
+	}
+}
+
+bool CMyNote2Doc::SaveToFile(const CString& path)
+{
+	CStdioFile file;
+	if (!file.Open(path, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary))
+	{
+		return false;
+	}
+
+	file.WriteString(m_strContent);
+	file.Close();
+	return true;
+}
+
+void CMyNote2Doc::OnFileSave()
+{
+	if (m_filePath.IsEmpty())
+	{
+		OnFileSaveAs();
+		return;
+	}
+
+	if (SaveToFile(m_filePath))
+	{
+		SetModifiedFlag(FALSE);
+	}
+}
+
+void CMyNote2Doc::OnFileSaveAs()
+{
+	CFileDialog dlg(FALSE, L"txt", nullptr,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||");
+
+	if (dlg.DoModal() == IDOK)
+	{
+		CString path = dlg.GetPathName();
+		if (SaveToFile(path))
+		{
+			m_filePath = path;
+			SetPathName(path);
+			SetModifiedFlag(FALSE);
+		}
 	}
 }
 

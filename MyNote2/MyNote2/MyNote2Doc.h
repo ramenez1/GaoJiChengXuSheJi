@@ -15,6 +15,11 @@ protected: // 仅从序列化创建
 //功能
 public:
 	CString m_strContent; //存放文字
+	CString m_filePath;   // 保存路径
+
+	bool SaveToFile(const CString& path);
+	afx_msg void OnFileSave();
+	afx_msg void OnFileSaveAs();
 
 // 特性
 public:
