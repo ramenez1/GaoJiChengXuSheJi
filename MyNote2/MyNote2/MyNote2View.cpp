@@ -200,6 +200,43 @@ void CMyNote2View::UpdateCaretPosition()
 	int x = 0;
 	int y = 0;
 	CString text = pDoc->m_strContent;
+	CString word;
+
+	auto flushWord = [&](const CString& token, bool isWhitespace)
+	{
+		if (token.IsEmpty())
+		{
+			return;
+		}
+
+		CSize tokenSize = dc.GetTextExtent(token);
+		int maxWidth = rect.Width();
+
+		if (!isWhitespace && x > 0 && x + tokenSize.cx > maxWidth)
+		{
+			x = 0;
+			y += lineHeight;
+		}
+
+		if (tokenSize.cx <= maxWidth - x || isWhitespace)
+		{
+			x += tokenSize.cx;
+			return;
+		}
+
+		for (int i = 0; i < token.GetLength(); ++i)
+		{
+			CString oneChar(token[i]);
+			CSize sz = dc.GetTextExtent(oneChar);
+			if (x + sz.cx > maxWidth)
+			{
+				x = 0;
+				y += lineHeight;
+			}
+			x += sz.cx;
+		}
+	};
+
 	for (int i = 0; i < text.GetLength(); ++i)
 	{
 		TCHAR ch = text[i];
@@ -209,20 +246,26 @@ void CMyNote2View::UpdateCaretPosition()
 		}
 		if (ch == L'\n')
 		{
+			flushWord(word, false);
+			word.Empty();
 			x = 0;
 			y += lineHeight;
 			continue;
 		}
 
-		CString oneChar(ch);
-		CSize sz = dc.GetTextExtent(oneChar);
-		if (x + sz.cx > rect.Width())
+		if (ch == L' ' || ch == L'\t')
 		{
-			x = 0;
-			y += lineHeight;
+			flushWord(word, false);
+			word.Empty();
+			CString whitespace(ch);
+			flushWord(whitespace, true);
+			continue;
 		}
-		x += sz.cx;
+
+		word.AppendChar(ch);
 	}
+
+	flushWord(word, false);
 
 	dc.SelectObject(pOldFont);
 	SetCaretPos(CPoint(x, y));
