@@ -305,6 +305,52 @@ void CMyNote2View::OnFileSaveAs()
 	}
 }
 
+void CMyNote2View::OnFileSave()
+{
+	CMyNote2Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	if (pDoc->m_filePath.IsEmpty())
+	{
+		OnFileSaveAs();
+		return;
+	}
+
+	if (pDoc->SaveToFile(pDoc->m_filePath))
+	{
+		pDoc->SetModifiedFlag(FALSE);
+	}
+}
+
+void CMyNote2View::OnFileSaveAs()
+{
+	CMyNote2Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	CFileDialog dlg(FALSE, L"txt", nullptr,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||");
+
+	if (dlg.DoModal() == IDOK)
+	{
+		CString path = dlg.GetPathName();
+		if (pDoc->SaveToFile(path))
+		{
+			pDoc->m_filePath = path;
+			pDoc->SetPathName(path);
+			pDoc->SetModifiedFlag(FALSE);
+		}
+	}
+}
+
 //void CMyNote2View::OnSetFocus(CWnd* pOldWnd)
 //{
 //	CView::OnSetFocus(pOldWnd);
