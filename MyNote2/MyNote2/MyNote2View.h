@@ -16,6 +16,8 @@ public:
 	COLORREF m_crBack; // 背景颜色值
 	CBrush m_brBack;   // 刷背景
 	CFont m_font;      // 文字样式
+	bool m_hasFocus;
+	void UpdateCaretPosition();
 // 特性
 public:
 	CMyNote2Doc* GetDocument() const;
@@ -49,12 +51,12 @@ public:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSetFont();
 	afx_msg void OnSetBg();
-//	afx_msg void OnSetFocus(CWnd* pOldWnd);
-//	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
 
 #ifndef _DEBUG  // MyNote2View.cpp 中的调试版本
 inline CMyNote2Doc* CMyNote2View::GetDocument() const
    { return reinterpret_cast<CMyNote2Doc*>(m_pDocument); }
 #endif
-

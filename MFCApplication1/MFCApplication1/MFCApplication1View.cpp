@@ -13,6 +13,8 @@
 #include "MFCApplication1Doc.h"
 #include "MFCApplication1View.h"
 
+#include <afxdlgs.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -38,6 +40,8 @@ BEGIN_MESSAGE_MAP(CMFCApplication1View, CView)
 	ON_UPDATE_COMMAND_UI(ID_DRAW_ELLIPSE, &CMFCApplication1View::OnUpdateDrawEllipse)
 	ON_COMMAND(ID_EDIT_UNDO, &CMFCApplication1View::OnEditUndo)
 	ON_COMMAND(ID_EDIT_CLEARALL, &CMFCApplication1View::OnEditClearall)
+	ON_COMMAND(ID_FILE_SAVE, &CMFCApplication1View::OnFileSave)
+	ON_COMMAND(ID_FILE_SAVE_AS, &CMFCApplication1View::OnFileSaveAs)
 END_MESSAGE_MAP()
 
 // CMFCApplication1View 构造/析构
@@ -298,5 +302,51 @@ void CMFCApplication1View::OnEditClearall()
 		pDoc->m_shapes.clear();
 		pDoc->SetModifiedFlag(TRUE);
 		Invalidate();
+	}
+}
+
+void CMFCApplication1View::OnFileSave()
+{
+	CMFCApplication1Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	if (pDoc->m_filePath.IsEmpty())
+	{
+		OnFileSaveAs();
+		return;
+	}
+
+	if (pDoc->SaveToFile(pDoc->m_filePath))
+	{
+		pDoc->SetModifiedFlag(FALSE);
+	}
+}
+
+void CMFCApplication1View::OnFileSaveAs()
+{
+	CMFCApplication1Doc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if (!pDoc)
+	{
+		return;
+	}
+
+	CFileDialog dlg(FALSE, L"draw", nullptr,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"Draw Files (*.draw)|*.draw|All Files (*.*)|*.*||");
+
+	if (dlg.DoModal() == IDOK)
+	{
+		CString path = dlg.GetPathName();
+		if (pDoc->SaveToFile(path))
+		{
+			pDoc->m_filePath = path;
+			pDoc->SetPathName(path);
+			pDoc->SetModifiedFlag(FALSE);
+		}
 	}
 }
