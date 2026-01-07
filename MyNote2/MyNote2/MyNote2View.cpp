@@ -32,8 +32,6 @@ BEGIN_MESSAGE_MAP(CMyNote2View, CView)
 	ON_WM_CHAR()
 	ON_COMMAND(ID_SET_FONT, &CMyNote2View::OnSetFont)
 	ON_COMMAND(ID_SET_BG, &CMyNote2View::OnSetBg)
-	ON_COMMAND(ID_FILE_SAVE, &CMyNote2View::OnFileSave)
-	ON_COMMAND(ID_FILE_SAVE_AS, &CMyNote2View::OnFileSaveAs)
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
 	ON_WM_SIZE()
@@ -257,98 +255,6 @@ void CMyNote2View::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 	UpdateCaretPosition();
-}
-
-void CMyNote2View::OnFileSave()
-{
-	CMyNote2Doc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-	{
-		return;
-	}
-
-	if (pDoc->m_filePath.IsEmpty())
-	{
-		OnFileSaveAs();
-		return;
-	}
-
-	if (pDoc->SaveToFile(pDoc->m_filePath))
-	{
-		pDoc->SetModifiedFlag(FALSE);
-	}
-}
-
-void CMyNote2View::OnFileSaveAs()
-{
-	CMyNote2Doc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-	{
-		return;
-	}
-
-	CFileDialog dlg(FALSE, L"txt", nullptr,
-		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-		L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||");
-
-	if (dlg.DoModal() == IDOK)
-	{
-		CString path = dlg.GetPathName();
-		if (pDoc->SaveToFile(path))
-		{
-			pDoc->m_filePath = path;
-			pDoc->SetPathName(path);
-			pDoc->SetModifiedFlag(FALSE);
-		}
-	}
-}
-
-void CMyNote2View::OnFileSave()
-{
-	CMyNote2Doc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-	{
-		return;
-	}
-
-	if (pDoc->m_filePath.IsEmpty())
-	{
-		OnFileSaveAs();
-		return;
-	}
-
-	if (pDoc->SaveToFile(pDoc->m_filePath))
-	{
-		pDoc->SetModifiedFlag(FALSE);
-	}
-}
-
-void CMyNote2View::OnFileSaveAs()
-{
-	CMyNote2Doc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	if (!pDoc)
-	{
-		return;
-	}
-
-	CFileDialog dlg(FALSE, L"txt", nullptr,
-		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-		L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*||");
-
-	if (dlg.DoModal() == IDOK)
-	{
-		CString path = dlg.GetPathName();
-		if (pDoc->SaveToFile(path))
-		{
-			pDoc->m_filePath = path;
-			pDoc->SetPathName(path);
-			pDoc->SetModifiedFlag(FALSE);
-		}
-	}
 }
 
 //void CMyNote2View::OnSetFocus(CWnd* pOldWnd)

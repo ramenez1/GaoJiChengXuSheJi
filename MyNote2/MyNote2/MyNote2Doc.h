@@ -18,6 +18,8 @@ public:
 	CString m_filePath;   // 保存路径
 
 	bool SaveToFile(const CString& path);
+	afx_msg void OnFileSave();
+	afx_msg void OnFileSaveAs();
 
 // 特性
 public:

@@ -51,8 +51,6 @@ public:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSetFont();
 	afx_msg void OnSetBg();
-	afx_msg void OnFileSave();
-	afx_msg void OnFileSaveAs();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
