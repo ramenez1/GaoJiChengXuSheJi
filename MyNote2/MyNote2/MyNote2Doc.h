@@ -15,6 +15,9 @@ protected: // 仅从序列化创建
 //功能
 public:
 	CString m_strContent; //存放文字
+	CString m_filePath;   // 保存路径
+
+	bool SaveToFile(const CString& path);
 
 // 特性
 public:

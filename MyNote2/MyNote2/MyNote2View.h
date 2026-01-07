@@ -49,6 +49,8 @@ public:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSetFont();
 	afx_msg void OnSetBg();
+	afx_msg void OnFileSave();
+	afx_msg void OnFileSaveAs();
 //	afx_msg void OnSetFocus(CWnd* pOldWnd);
 //	afx_msg void OnKillFocus(CWnd* pNewWnd);
 };
@@ -57,4 +59,3 @@ public:
 inline CMyNote2Doc* CMyNote2View::GetDocument() const
    { return reinterpret_cast<CMyNote2Doc*>(m_pDocument); }
 #endif
-

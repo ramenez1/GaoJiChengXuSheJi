@@ -30,6 +30,9 @@ protected: // 仅从序列化创建
 public:
 	// 数据存储
 	vector<MyShape> m_shapes; // 存储所有已画好的图形
+	CString m_filePath;       // 保存路径
+
+	bool SaveToFile(const CString& path);
 // 特性
 public:
 
